@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Cube Menu with Gesture Control</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #111;
+      perspective: 1000px;
+      font-family: Arial, sans-serif;
+    }
+
+    .cube-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      transform-style: preserve-3d;
+    }
+
+    .cube {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transform: rotateX(-30deg) rotateY(30deg);
+      transition: transform 1.5s ease-in-out; /* Reduced transition time */
+    }
+
+    .cube div {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: rgba(0, 255, 0, 0.8);
+      border: 2px solid #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 40px;
+      color: #fff;
+      transition: background 0.3s ease;
+    }
+
+    .cube div:hover {
+      background: rgba(255, 0, 0, 0.8);
+      cursor: pointer;
+    }
+
+    .cube .front { transform: translateZ(100px); }
+    .cube .back { transform: rotateY(180deg) translateZ(100px); }
+    .cube .left { transform: rotateY(-90deg) translateZ(100px); }
+    .cube .right { transform: rotateY(90deg) translateZ(100px); }
+    .cube .top { transform: rotateX(90deg) translateZ(100px); }
+    .cube .bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .controls button {
+      background: rgba(0, 255, 0, 0.8);
+      border: none;
+      padding: 10px;
+      color: #fff;
+      font-size: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .controls button:hover {
+      background: rgba(255, 0, 0, 0.8);
+    }
+
+    /* Hide the manual controls on touch devices */
+    @media (pointer: coarse) {
+      .controls {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cube-container" id="cube-container">
+    <div class="cube" id="cube">
+      <div class="front" onclick="goToPage('https://www.google.com')"><i class="fab fa-google"></i></div>
+      <div class="back" onclick="goToPage('https://www.github.com')"><i class="fab fa-github"></i></div>
+      <div class="left" onclick="goToPage('https://www.facebook.com')"><i class="fab fa-facebook"></i></div>
+      <div class="right" onclick="goToPage('https://www.twitter.com')"><i class="fab fa-twitter"></i></div>
+      <div class="top" onclick="goToPage('https://www.linkedin.com')"><i class="fab fa-linkedin"></i></div>
+      <div class="bottom" onclick="goToPage('https://www.youtube.com')"><i class="fab fa-youtube"></i></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="rotateCube('left')"><i class="fas fa-arrow-left"></i></button>
+    <button onclick="rotateCube('right')"><i class="fas fa-arrow-right"></i></button>
+    <button onclick="rotateCube('up')"><i class="fas fa-arrow-up"></i></button>
+    <button onclick="rotateCube('down')"><i class="fas fa-arrow-down"></i></button>
+  </div>
+
+  <script>
+    let xRotation = -30;
+    let yRotation = 30;
+    let startX, startY, isTouching = false;
+
+    function rotateCube(direction) {
+      switch (direction) {
+        case 'left':
+          yRotation -= 90;
+          break;
+        case 'right':
+          yRotation += 90;
+          break;
+        case 'down':
+          xRotation -= 90;
+          break;
+        case 'up':
+          xRotation += 90;
+          break;
+      }
+      updateCubeRotation();
+    }
+
+    function updateCubeRotation() {
+      document.getElementById('cube').style.transform = `rotateX(${xRotation}deg) rotateY(${yRotation}deg)`;
+    }
+
+    function goToPage(url) {
+      window.location.href = url;
+    }
+
+    // Touch gesture controls
+    const cubeContainer = document.getElementById('cube-container');
+
+    cubeContainer.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      isTouching = true;
+    });
+
+    cubeContainer.addEventListener('touchmove', (e) => {
+      if (!isTouching) return;
+
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const deltaX = currentX - startX;
+      const deltaY = currentY - startY;
+
+      // Adjust rotation based on swipe distance
+      const sensitivity = window.matchMedia("(pointer: coarse)").matches ? 1.5 : 3; // Sensitivity based on device type
+      yRotation += deltaX / sensitivity; // Increased sensitivity for mobile
+      xRotation -= deltaY / sensitivity; // Increased sensitivity for mobile
+
+      updateCubeRotation();
+
+      startX = currentX;
+      startY = currentY;
+    });
+
+    cubeContainer.addEventListener('touchend', () => {
+      isTouching = false;
+    });
+  </script>
+
+</body>
+</html>
